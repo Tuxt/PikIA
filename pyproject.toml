@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PikIA"
+version = "0.1.0"
+description = "A simple AI-powered photo organizer."
+authors = [
+    { name = "Tuxt", email = "tuxt@protonmail.com" },
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = [
+    "transformers",
+    "Pillow",
+    "InquirerPy",
+    "torch",
+]
+keywords = ["pikia", "photos", "organizer", "AI"]
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+pikia = "pikia.main:main"

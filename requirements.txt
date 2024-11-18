@@ -1,0 +1,4 @@
+Pillow
+InquirerPy
+transformers
+torch
