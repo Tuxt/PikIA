@@ -2,3 +2,5 @@ Pillow
 InquirerPy
 transformers
 torch
+timm
+einops

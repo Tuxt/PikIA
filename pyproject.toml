@@ -16,6 +16,8 @@ dependencies = [
     "Pillow",
     "InquirerPy",
     "torch",
+    "timm",
+    "einops",
 ]
 keywords = ["pikia", "photos", "organizer", "AI"]
 classifiers = [
