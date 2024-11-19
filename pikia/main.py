@@ -1,6 +1,7 @@
 from InquirerPy import inquirer
 from InquirerPy.validator import PathValidator
 import os
+import db
 
 def prompt_directories():
     # Instructions
