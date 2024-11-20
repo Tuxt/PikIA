@@ -1,12 +1,15 @@
 from InquirerPy import inquirer
 from InquirerPy.validator import PathValidator
+from transformers import AutoModelForCausalLM, AutoProcessor
+import torch
 import os
+from PIL import Image
 
 class PikIA:
+    
     def __init__(self):
         self.directories = self._prompt_directories()
         self.recursive = inquirer.confirm(message="Scan directories recursively?", default=True).execute()
-        self.model = "microsoft/Florence-2-large"
 
     def _prompt_directories(self):
         # Instructions
@@ -45,6 +48,42 @@ class PikIA:
         return directories
 
 
+class Model:
+    
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+    def __init__(self, model="microsoft/Florence-2-large", prompt="<OD>"):
+        self.prompt = prompt # "<CAPTION>" | "<DETAILED_CAPTION>" | "<MORE_DETAILED_CAPTION>" | "<OD>"
+        
+        # Initialize model
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model, torch_dtype=self.torch_dtype, trust_remote_code=True
+        ).to(self.device)
+        self.processor = AutoProcessor.from_pretrained(model, trust_remote_code=True)
+
+    def caption(self, image):
+        image = Image.open(image)
+        
+        inputs = self.processor(text=self.prompt, images=image, return_tensors="pt").to(self.device, self.torch_dtype)
+        generated_ids = self.model.generate(
+            input_ids=inputs["input_ids"],
+            pixel_values=inputs["pixel_values"],
+            max_new_tokens=1024,
+            num_beams=3,
+        )
+        generated_text = self.processor.batch_decode(generated_ids, skip_special_tokens=False)[0]
+
+        parsed_answer = self.processor.post_process_generation(
+            generated_text, task=self.prompt, image_size=image.size
+        )
+        image.close()
+        
+        result = parsed_answer[self.prompt]
+        if self.prompt == '<OD>':
+            return [ObjectDetection(label, bbox, image.size) for label, bbox in zip(result['labels'], result['bboxes'])]
+        else:
+            return result
 
 class ObjectDetection:
     def __init__(self, tag, bbox, img_shape):
