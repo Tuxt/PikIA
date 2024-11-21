@@ -3,13 +3,24 @@ from InquirerPy.validator import PathValidator
 from transformers import AutoModelForCausalLM, AutoProcessor
 import torch
 import os
+from pathlib import Path
 from PIL import Image
 
 class PikIA:
-    
+
+    VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".ico", ".webp"}
+
     def __init__(self):
         self.directories = self._prompt_directories()
         self.recursive = inquirer.confirm(message="Scan directories recursively?", default=True).execute()
+        self.files = []
+
+    def run(self):
+        ready = inquirer.confirm(message="Start scan?", default=False).execute()
+        if not ready:
+            return
+
+        self._scan_directories()
 
     def _prompt_directories(self):
         # Instructions
@@ -46,6 +57,17 @@ class PikIA:
         directories = list(set(directories))
 
         return directories
+
+    def _scan_directories(self):
+        for directory in self.directories:
+            self._scan_directory(directory)
+    
+    def _scan_directory(self, directory):
+        path = Path(directory)
+        if self.recursive:
+            self.files += [str(file) for file in path.rglob("*") if file.suffix in self.VALID_EXTENSIONS]
+        else:
+            self.files += [str(file) for file in path.glob("*") if file.is_file() and file.suffix in self.VALID_EXTENSIONS]
 
 
 class Model:
