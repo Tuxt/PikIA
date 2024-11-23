@@ -4,7 +4,7 @@ from transformers import AutoModelForCausalLM, AutoProcessor
 import torch
 import os
 from pathlib import Path
-from PIL import Image
+from tqdm import tqdm
 
 class PikIA:
 
@@ -59,7 +59,7 @@ class PikIA:
         return directories
 
     def _scan_directories(self):
-        for directory in self.directories:
+        for directory in tqdm(self.directories):
             self._scan_directory(directory)
     
     def _scan_directory(self, directory):
