@@ -18,18 +18,18 @@ def create_db() -> None:
         ")"
     )
     cursor.execute(
-        "CREATE TABLE IF NOT EXISTS tags("
+        "CREATE TABLE IF NOT EXISTS labels("
             "id INTEGER PRIMARY KEY,"
-            "tagname VARCHAR(64) NOT NULL UNIQUE"
+            "labelname VARCHAR(64) NOT NULL UNIQUE"
         ")"
     )
     cursor.execute(
-        "CREATE TABLE IF NOT EXISTS file_tag("
+        "CREATE TABLE IF NOT EXISTS file_label("
             "id INTEGER PRIMARY KEY,"
             "file_id INTEGER,"
-            "tag_id INTEGER,"
+            "label_id INTEGER,"
             "FOREIGN KEY(file_id) REFERENCES files(id),"
-            "FOREIGN KEY(tag_id) REFERENCES tags(id)"
+            "FOREIGN KEY(label_id) REFERENCES labels(id)"
         ")"
     )
 

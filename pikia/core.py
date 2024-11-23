@@ -108,8 +108,8 @@ class Model:
             return result
 
 class ObjectDetection:
-    def __init__(self, tag, bbox, img_shape):
-        self.tag = tag
+    def __init__(self, label, bbox, img_shape):
+        self.label = label
         self.img_shape = img_shape
         self.bbox = bbox
     
@@ -172,4 +172,4 @@ class ObjectDetection:
         return ObjectDetection.calc_point_distance(p1, p2)
 
     def __str__(self):
-        return f"ObjectDetection({self.tag}, {self.weight})"
+        return f"ObjectDetection({self.label}, {self.weight})"
