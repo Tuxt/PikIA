@@ -1,7 +1,8 @@
-import db
+from .core import PikIA
 
 def main():
-    print("...")
+    pikia = PikIA()
+    pikia.run()
 
 
 if __name__ == "__main__":
