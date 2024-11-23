@@ -8,11 +8,13 @@ def create_db() -> None:
     cursor.execute(
         "CREATE TABLE IF NOT EXISTS files("
             "id INTEGER PRIMARY KEY,"
-            "sha256 VARCHAR(64) NOT NULL UNIQUE,"
             "filepath VARCHAR(1000) NOT NULL UNIQUE,"
             "caption VARCHAR(128),"
             "detailed_caption VARCHAR(256),"
-            "more_detailed_caption VARCHAR(512)"
+            "more_detailed_caption VARCHAR(512),"
+            "processed BOOLEAN NOT NULL DEFAULT 0,"
+            "final_label INTEGER,"
+            "FOREIGN KEY(final_label) REFERENCES labels(id)"
         ")"
     )
     cursor.execute(
