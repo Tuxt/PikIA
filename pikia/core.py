@@ -103,9 +103,11 @@ class Model:
         
         result = parsed_answer[self.prompt]
         if self.prompt == '<OD>':
-            return [ObjectDetection(label, bbox, image.size) for label, bbox in zip(result['labels'], result['bboxes'])]
+            img_analysis = ImageAnalysis(image.filename, [ObjectDetection(label, bbox, image.size) for label, bbox in zip(result['labels'], result['bboxes'])])
+            return img_analysis
         else:
             return result
+
 
 class ObjectDetection:
     def __init__(self, label, bbox, img_shape):
@@ -148,7 +150,9 @@ class ObjectDetection:
         )
         self.centrality_weight = 1 - (self.bbox_distance / self.max_img_distance)
         
-    
+    def normalize_weight(self, max_weight):
+        self.normalized_weight = self.weight / max_weight
+
     @staticmethod
     def calc_area(bbox):
         x1, y1, x2, y2 = bbox
@@ -173,3 +177,29 @@ class ObjectDetection:
 
     def __str__(self):
         return f"ObjectDetection({self.label}, {self.weight})"
+
+
+class ImageAnalysis:
+    def __init__(self, filename: str, detections: list[ObjectDetection] | None):
+        self.filename = filename
+        self.detections = sorted(detections, key=lambda x: x.weight, reverse=True) if detections is not None else None
+    
+    def get_top_detections(self, method: str = "top_n", n: int = 3):
+        if self.detections is None:
+            return None
+        
+        if method == "top_n":
+            return self.detections[:n]
+        elif method == "relative_threshold":
+            total_weight = sum(d.weight for d in self.detections)
+            acc = 0
+            top_detections = []
+            for detection in self.detections:
+                detection.normalize_weight(total_weight)
+                acc += detection.normalized_weight
+                top_detections.append(detection)
+                if acc >= 0.8:
+                    break
+            
+            return top_detections
+            
