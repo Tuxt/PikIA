@@ -28,6 +28,7 @@ def create_db() -> None:
             "id INTEGER PRIMARY KEY,"
             "file_id INTEGER,"
             "label_id INTEGER,"
+            "weight REAL,"
             "FOREIGN KEY(file_id) REFERENCES files(id),"
             "FOREIGN KEY(label_id) REFERENCES labels(id)"
         ")"
