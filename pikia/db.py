@@ -27,12 +27,12 @@ def create_db() -> None:
     )
     cursor.execute(
         "CREATE TABLE IF NOT EXISTS file_label("
-            "id INTEGER PRIMARY KEY,"
             "file_id INTEGER,"
             "label_id INTEGER,"
             "weight REAL,"
             "FOREIGN KEY(file_id) REFERENCES files(id),"
-            "FOREIGN KEY(label_id) REFERENCES labels(id)"
+            "FOREIGN KEY(label_id) REFERENCES labels(id),"
+            "PRIMARY KEY(file_id, label_id)"
         ")"
     )
 
@@ -56,7 +56,7 @@ def insert_file_label_relation(filename: str, label: str, weight: int):
         raise RelationshipError(f"Missing row for file '{filename}' or label '{label}'")
     
     file_id, label_id = result
-    cursor.execute("INSERT INTO file_label(file_id, label_id, weight) VALUES (?, ?, ?)", [file_id, label_id, weight])
+    cursor.execute("INSERT OR IGNORE INTO file_label(file_id, label_id, weight) VALUES (?, ?, ?)", [file_id, label_id, weight])
     connection.commit()
 
     
