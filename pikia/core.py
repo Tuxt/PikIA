@@ -183,13 +183,20 @@ class ImageAnalysis:
     def __init__(self, filename: str, detections: list[ObjectDetection] | None):
         self.filename = filename
         self.detections = sorted(detections, key=lambda x: x.weight, reverse=True) if detections is not None else None
+        self._cache = {}
     
     def get_top_detections(self, method: str = "top_n", n: int = 3):
+        # Check for None detections
         if self.detections is None:
             return None
         
+        # Check cache
+        cache_key = (method, n)
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+        
         if method == "top_n":
-            return self.detections[:n]
+            result = self.detections[:n]
         elif method == "relative_threshold":
             total_weight = sum(d.weight for d in self.detections)
             acc = 0
@@ -201,5 +208,8 @@ class ImageAnalysis:
                 if acc >= 0.8:
                     break
             
-            return top_detections
+            result = top_detections
+        
+        self._cache[cache_key] = result
+        return result
             
