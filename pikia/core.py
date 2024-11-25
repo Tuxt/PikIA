@@ -191,7 +191,7 @@ class ImageAnalysis:
     def get_top_detections(self, method: str = "top_n", n: int = 3):
         # Check for None detections
         if self.detections is None:
-            return None
+            return []
         
         # Check cache
         cache_key = (method, n)
