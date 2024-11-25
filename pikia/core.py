@@ -69,6 +69,21 @@ class PikIA:
         else:
             self.files += [str(file) for file in path.glob("*") if file.is_file() and file.suffix in self.VALID_EXTENSIONS]
 
+    def _analyze_images(self):
+        labels = self._label_images()
+        db.insert_analysis(labels)
+    
+    def _label_images(self):
+        labels = [self.model.caption(image) for image in tqdm(self.images)]
+
+        failed = [label.filename for label in labels if label.detections is None]
+        print(f"{len(labels)} files processed")
+        if len(failed) > 0:
+            print(f"{len(failed)} invalid images:")
+            for filename in failed:
+                print(f"> {filename}")
+        return labels
+
 
 class Model:
     
