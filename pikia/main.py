@@ -1,4 +1,4 @@
-from .core import PikIA
+from core import PikIA
 
 def main():
     pikia = PikIA()
