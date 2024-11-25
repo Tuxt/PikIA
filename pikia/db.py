@@ -1,4 +1,7 @@
 import sqlite3
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from core import ImageAnalysis
 
 connection: sqlite3.Connection = sqlite3.connect("pikia.db")
 cursor: sqlite3.Cursor = connection.cursor()
@@ -59,4 +62,17 @@ def insert_file_label_relation(filename: str, label: str, weight: int):
     cursor.execute("INSERT OR IGNORE INTO file_label(file_id, label_id, weight) VALUES (?, ?, ?)", [file_id, label_id, weight])
     connection.commit()
 
+def insert_analysis(analysis_list: list['ImageAnalysis']):
+    # List and insert labels
+    labels = [
+        detection.label
+        for analysis in analysis_list
+        for detection in analysis.get_top_detections()
+    ]
+    insert_labels(labels)
+    
+    # Insert relations between each file and each label
+    for analysis in analysis_list:
+        for detection in analysis.get_top_detections():
+            insert_file_label_relation(analysis.filename, detection.label, detection.weight)
     
