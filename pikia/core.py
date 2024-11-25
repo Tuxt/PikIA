@@ -85,7 +85,10 @@ class Model:
         self.processor = AutoProcessor.from_pretrained(model, trust_remote_code=True)
 
     def caption(self, image):
-        image = Image.open(image)
+        try:
+            image = Image.open(image)
+        except (FileNotFoundError, UnidentifiedImageError):
+            return ImageAnalysis(image, None)
         
         inputs = self.processor(text=self.prompt, images=image, return_tensors="pt").to(self.device, self.torch_dtype)
         generated_ids = self.model.generate(
