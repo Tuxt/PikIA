@@ -41,7 +41,7 @@ class PikIA:
         if not ready_to_analyze:
             return
         
-        self._analyze_images()
+        self._analyze_and_save_images()
 
     def _prompt_directories(self):
         # Instructions
@@ -90,11 +90,11 @@ class PikIA:
         else:
             self.images += [str(file) for file in path.glob("*") if file.is_file() and file.suffix in self.VALID_EXTENSIONS]
 
-    def _analyze_images(self):
-        labels = self._label_images()
+    def _analyze_and_save_images(self):
+        labels = self._analyze_images()
         db.insert_analysis(labels)
     
-    def _label_images(self):
+    def _analyze_images(self):
         labels = [self.model.caption(image) for image in tqdm(self.images)]
 
         failed = [label.filename for label in labels if label.detections is None]
