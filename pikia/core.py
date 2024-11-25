@@ -14,6 +14,7 @@ class PikIA:
 
     def __init__(self):
         self.images = []
+        self.model = Model()
 
     def run(self):
         # Prompt for directories
@@ -27,6 +28,20 @@ class PikIA:
             return
         
         self._scan_directories()
+        if len(self.images) == 0:
+            print('No images found!')
+            return
+        
+        # Save images to db
+        db.insert_imagefiles(self.images)
+        
+        # Image analysis
+        ready_to_analyze = inquirer.confirm(message=f"{len(self.images)} found. Start analysis?", default=True).execute()
+        
+        if not ready_to_analyze:
+            return
+        
+        self._analyze_images()
 
     def _prompt_directories(self):
         # Instructions
