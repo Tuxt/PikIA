@@ -13,7 +13,7 @@ class PikIA:
     VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".ico", ".webp"}
 
     def __init__(self):
-        self.files = []
+        self.images = []
 
     def run(self):
         # Prompt for directories
@@ -71,9 +71,9 @@ class PikIA:
     def _scan_directory(self, directory):
         path = Path(directory)
         if self.recursive:
-            self.files += [str(file) for file in path.rglob("*") if file.suffix in self.VALID_EXTENSIONS]
+            self.images += [str(file) for file in path.rglob("*") if file.suffix in self.VALID_EXTENSIONS]
         else:
-            self.files += [str(file) for file in path.glob("*") if file.is_file() and file.suffix in self.VALID_EXTENSIONS]
+            self.images += [str(file) for file in path.glob("*") if file.is_file() and file.suffix in self.VALID_EXTENSIONS]
 
     def _analyze_images(self):
         labels = self._label_images()
