@@ -21,9 +21,9 @@ class PikIA:
 
         # Directory scanning
         self.recursive = inquirer.confirm(message="Scan directories recursively?", default=True).execute()
-        ready = inquirer.confirm(message="Start scan?", default=False).execute()
+        ready_to_scan_directories = inquirer.confirm(message="Start scan?", default=False).execute()
         
-        if not ready:
+        if not ready_to_scan_directories:
             return
         
         self._scan_directories()
