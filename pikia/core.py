@@ -4,22 +4,28 @@ from transformers import AutoModelForCausalLM, AutoProcessor
 import torch
 import os
 from pathlib import Path
+from PIL import Image, UnidentifiedImageError
 from tqdm import tqdm
+import db
 
 class PikIA:
 
     VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".ico", ".webp"}
 
     def __init__(self):
-        self.directories = self._prompt_directories()
-        self.recursive = inquirer.confirm(message="Scan directories recursively?", default=True).execute()
         self.files = []
 
     def run(self):
+        # Prompt for directories
+        self.directories = self._prompt_directories()
+
+        # Directory scanning
+        self.recursive = inquirer.confirm(message="Scan directories recursively?", default=True).execute()
         ready = inquirer.confirm(message="Start scan?", default=False).execute()
+        
         if not ready:
             return
-
+        
         self._scan_directories()
 
     def _prompt_directories(self):
