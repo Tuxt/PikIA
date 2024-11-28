@@ -76,3 +76,5 @@ def insert_analysis(analysis_list: list['ImageAnalysis']):
         for detection in analysis.get_top_detections():
             insert_file_label_relation(analysis.filename, detection.label, detection.weight)
     
+def select_labels_by_frequency():
+    return cursor.execute("select labels.labelname, count(file_label.label_id) as times from labels, file_label where file_label.label_id = labels.id group by file_label.label_id order by times desc").fetchall()
