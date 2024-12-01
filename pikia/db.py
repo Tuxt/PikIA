@@ -78,3 +78,26 @@ def insert_analysis(analysis_list: list['ImageAnalysis']):
     
 def select_labels_by_frequency():
     return cursor.execute("select labels.labelname, count(file_label.label_id) as times from labels, file_label where file_label.label_id = labels.id group by file_label.label_id order by times desc").fetchall()
+
+def select_images_with_best_label(labels: list[str]):
+    if len(labels) == 0:
+        return []
+    
+    return cursor.execute(
+        """
+        WITH RankedLabels AS (
+            SELECT f.id AS file_id, f.filepath, l.labelname, fl.weight,
+                ROW_NUMBER() OVER (PARTITION BY f.id ORDER BY fl.weight DESC) AS rank
+            FROM files f
+            INNER JOIN file_label fl ON f.id = fl.file_id
+            INNER JOIN labels l ON fl.label_id = l.id
+            WHERE l.labelname IN ({seq})
+        )
+        SELECT file_id, filepath, labelname
+        FROM RankedLabels
+        WHERE rank = 1
+        """.format(seq=",".join("?" * len(labels))),
+        labels).fetchall()
+
+def select_total_file_count():
+    return cursor.execute("SELECT COUNT(*) FROM files").fetchone()[0]
