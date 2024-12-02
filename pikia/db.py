@@ -86,14 +86,14 @@ def select_images_with_best_label(labels: list[str]):
     return cursor.execute(
         """
         WITH RankedLabels AS (
-            SELECT f.id AS file_id, f.filepath, l.labelname, fl.weight,
+            SELECT f.id AS file_id, f.filepath, l.id as label_id, l.labelname, fl.weight,
                 ROW_NUMBER() OVER (PARTITION BY f.id ORDER BY fl.weight DESC) AS rank
             FROM files f
             INNER JOIN file_label fl ON f.id = fl.file_id
             INNER JOIN labels l ON fl.label_id = l.id
             WHERE l.labelname IN ({seq})
         )
-        SELECT file_id, filepath, labelname
+        SELECT file_id, filepath, label_id, labelname
         FROM RankedLabels
         WHERE rank = 1
         """.format(seq=",".join("?" * len(labels))),
