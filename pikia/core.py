@@ -7,6 +7,7 @@ from pathlib import Path
 from PIL import Image, UnidentifiedImageError
 from tqdm import tqdm
 import db
+from custom_prompts import CheckboxPromptWithStatus
 
 class PikIA:
 
@@ -42,6 +43,9 @@ class PikIA:
             return
         
         self._analyze_and_save_images()
+
+        # Clusters selection
+        self._prompt_clusters()
 
     def _prompt_directories(self):
         # Instructions
@@ -105,6 +109,24 @@ class PikIA:
                 print(f"> {filename}")
         return labels
 
+    def _prompt_clusters(self):
+        labels = db.select_labels_by_frequency()
+        total_files = db.select_total_file_count()
+
+        def updater(values):
+            values = [item["value"] for item in values]
+            num_files = len(db.select_images_with_best_label(values))
+            return f"{num_files}/{total_files} affected"
+
+        clusters = CheckboxPromptWithStatus(
+            initial_status=f"0/{total_files} affected",
+            status_updater=updater,
+            message="Select image clusters:",
+            choices=[e[0] for e in labels],
+            cycle=True,
+        ).execute()
+
+        return clusters
 
 class Model:
     
