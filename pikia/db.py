@@ -75,7 +75,7 @@ def insert_analysis(analysis_list: list['ImageAnalysis']):
     for analysis in analysis_list:
         for detection in analysis.get_top_detections():
             insert_file_label_relation(analysis.filename, detection.label, detection.weight)
-    
+
 def select_labels_by_frequency():
     return cursor.execute("select labels.labelname, count(file_label.label_id) as times from labels, file_label where file_label.label_id = labels.id group by file_label.label_id order by times desc").fetchall()
 
@@ -101,3 +101,7 @@ def select_images_with_best_label(labels: list[str]):
 
 def select_total_file_count():
     return cursor.execute("SELECT COUNT(*) FROM files").fetchone()[0]
+
+def update_final_labels(final_labels: list[tuple[int, int]]):
+    cursor.executemany("UPDATE files SET final_label = ? WHERE id = ?", final_labels)
+    connection.commit()

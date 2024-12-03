@@ -45,7 +45,11 @@ class PikIA:
         self._analyze_and_save_images()
 
         # Clusters selection
-        self._prompt_clusters()
+        clusters = self._prompt_clusters()
+
+        # Save definitive labels to db
+        final_labels = db.select_images_with_best_label(clusters)
+        db.insert_final_labels([(e[2], e[0]) for e in final_labels])    # Arg: list with pairs (label_id, file_id)
 
     def _prompt_directories(self):
         # Instructions
@@ -127,6 +131,7 @@ class PikIA:
         ).execute()
 
         return clusters
+
 
 class Model:
     
