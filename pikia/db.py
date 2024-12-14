@@ -102,6 +102,9 @@ def select_images_with_best_label(labels: list[str]):
 def select_images_with_final_label():
     return cursor.execute("SELECT files.id, files.filepath, labels.labelname FROM files INNER JOIN labels ON files.final_label = labels.id").fetchall()
 
+def select_final_labels():
+    return [row[0] for row in cursor.execute("SELECT DISTINCT labels.labelname FROM labels INNER JOIN files ON files.final_label = labels.id").fetchall()]
+
 def select_total_file_count():
     return cursor.execute("SELECT COUNT(*) FROM files").fetchone()[0]
 
