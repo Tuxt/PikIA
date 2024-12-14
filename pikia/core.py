@@ -38,6 +38,9 @@ class PikIA:
             print('No images found!')
             return
         
+        # Remove duplicates
+        self.images = list(set(self.images))
+        
         # Save images to db
         db.insert_imagefiles(self.images)
         
