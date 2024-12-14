@@ -4,6 +4,7 @@ from transformers import AutoModelForCausalLM, AutoProcessor
 import torch
 from utils import sanitize_path
 from pathlib import Path
+import shutil
 from PIL import Image, UnidentifiedImageError
 from tqdm import tqdm
 import db
@@ -54,6 +55,9 @@ class PikIA:
         # Save definitive labels to db
         final_labels = db.select_images_with_best_label(clusters)
         db.update_final_labels([(e[2], e[0]) for e in final_labels])    # Arg: list with pairs (label_id, file_id)
+
+        # Cluster images
+        self._cluster_images()
 
     def _prompt_directories(self):
         # Instructions
@@ -134,6 +138,51 @@ class PikIA:
         ).execute()
 
         return clusters
+    
+    def _prompt_clustering_options(self):
+        keep_original_files = inquirer.confirm(
+            message="Keep original files? [COPY MODE]", default=True
+        ).execute()
+        destination_path = inquirer.filepath(
+            message="Enter path to place the output images:",
+            instruction="(An 'output' directory will be created inside)",
+            validate=PathValidator(is_dir=True, message="Input is not a directory"), # Permitir directorios no existentes pero comprobar que no son archivos y confirmar crear si tal
+            only_directories=True,
+            mandatory=True,
+            filter=lambda e: sanitize_path(e, additional_subdir="output"),
+        ).execute()
+
+        return keep_original_files, destination_path
+
+    def _cluster_images(self):
+        # Prompt for clustering options
+        keep_original_files, destination_path = self._prompt_clustering_options()
+        action = shutil.copy2 if keep_original_files else shutil.move
+
+        # Create destination folders for clusters
+        clusters = db.select_final_labels()
+        destination_path = Path(destination_path)
+        for cluster in clusters:
+            destination_path.joinpath(cluster).mkdir(parents=True, exist_ok=True)
+
+        for id, img_file, label in db.select_images_with_final_label():
+            # Prepare source and destination
+            img_file = Path(img_file)
+            new_file = destination_path.joinpath(label, img_file.name)
+
+            # Check if destination file exists (fix destination filename)
+            if new_file.exists():
+                filename = img_file.stem + "_{0}" + img_file.suffix
+                i = 0
+                while destination_path.joinpath(label, filename.format(i)).exists():
+                    i += 1
+                new_file = destination_path.joinpath(label, filename.format(i))
+            
+            # Copy/Move file
+            action(img_file.as_posix(), new_file.as_posix())
+            
+            # Set file as processed in db
+            db.update_processed_file(id)
 
 
 class Model:
