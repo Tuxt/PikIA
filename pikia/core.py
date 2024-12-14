@@ -2,7 +2,7 @@ from InquirerPy import inquirer
 from InquirerPy.validator import PathValidator
 from transformers import AutoModelForCausalLM, AutoProcessor
 import torch
-import os
+from utils import sanitize_path
 from pathlib import Path
 from PIL import Image, UnidentifiedImageError
 from tqdm import tqdm
@@ -56,12 +56,12 @@ class PikIA:
         print("Provide directories to scan for images")
         print("- Use arrows or tab to automplete")
         print("- Drag & Drop a directory to add")
-        print("- Ctrl+C to end")
+        print("- Escape to end")
 
         # Prompt for directories
         directories = []
         keybindings = {
-            "skip": [{"key": "c-c"}],
+            "skip": [{"key": "escape"}],
         }
 
         while True:
@@ -69,14 +69,13 @@ class PikIA:
                 message="Enter path to scan:",
                 validate=PathValidator(is_dir=True, message="Input is not a directory"),
                 only_directories=True,
-                # FILTER NOTES
-                # Need to concat `os.path.sep`: `os.path.abspath("C:")` -> `os.getcwd()`
-                # Dont `os.path.join(e, os.path.sep)`: `os.path.join(".dir", os.path.sep)` -> `"\\"`
-                filter=lambda e: os.path.abspath(e + os.path.sep if len(e) != 0 else ".")
+                filter=lambda e: sanitize_path(e)
                 if e is not None
                 else e,
                 keybindings=keybindings,
+                instruction="(Escape to end)",
                 mandatory=(len(directories) == 0),
+                mandatory_message="Please, specify at least one directory",
             ).execute()
             if new_dir is None:
                 break
