@@ -108,3 +108,7 @@ def select_total_file_count():
 def update_final_labels(final_labels: list[tuple[int, int]]):
     cursor.executemany("UPDATE files SET final_label = ? WHERE id = ?", final_labels)
     connection.commit()
+
+def update_processed_file(file_id: int, updated: bool = True):
+    cursor.execute("UPDATE files SET processed = ? WHERE id = ?", (updated, file_id))
+    connection.commit()
