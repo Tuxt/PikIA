@@ -9,6 +9,10 @@ from tqdm import tqdm
 import db
 from custom_prompts import CheckboxPromptWithStatus
 
+import warnings
+warnings.simplefilter(action="ignore", category=FutureWarning)
+
+
 class PikIA:
 
     VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".ico", ".webp"}
