@@ -3,7 +3,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from core import ImageAnalysis
 
-connection: sqlite3.Connection = sqlite3.connect("pikia.db")
+DB_FILENAME = "pikia.db"
+
+connection: sqlite3.Connection = sqlite3.connect(DB_FILENAME)
 cursor: sqlite3.Cursor = connection.cursor()
 
 class RelationshipError(Exception):

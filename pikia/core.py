@@ -5,6 +5,7 @@ import torch
 from utils import sanitize_path
 from pathlib import Path
 import shutil
+import time
 from PIL import Image, UnidentifiedImageError
 from tqdm import tqdm
 import db
@@ -61,6 +62,12 @@ class PikIA:
 
         # Cluster images
         self._cluster_images()
+
+        # End process: save db
+        sessions = Path("./sessions")
+        sessions.mkdir(exist_ok=True)
+        db.close()
+        shutil.move(db.DB_FILENAME, sessions.joinpath(db.DB_FILENAME + f".{time.strftime('%Y%m%d_%H%M%S')}").as_posix())
 
     def _prompt_directories(self):
         # Instructions
@@ -141,7 +148,7 @@ class PikIA:
         ).execute()
 
         return clusters
-    
+
     def _prompt_clustering_options(self):
         keep_original_files = inquirer.confirm(
             message="Keep original files? [COPY MODE]", default=True
