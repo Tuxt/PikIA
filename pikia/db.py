@@ -42,6 +42,9 @@ def create_db() -> None:
 
 create_db()
 
+def close():
+    """Close the database connection."""
+    connection.close()
 
 def insert_imagefiles(filenames: list[str]):
     filenames = [(filename,) for filename in filenames]
